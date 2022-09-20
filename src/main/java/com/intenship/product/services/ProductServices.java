@@ -11,20 +11,21 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
 
 @Service
-public class ProductServices {
+public class ProductServices implements ProductInterface {
     @Autowired
     private ProductRepository productRepository;
 
     @Autowired
     private WebClient.Builder webClientBuilder;
 
+    @Override
     public List<ProductDomain> showAllProductDetails() {
         return productRepository.findAll();
     }
 
+    @Override
     public Object showOneProductDetails(Long productId) {
-        if (productRepository.existsById(productId))
-            return productRepository.findById(productId).get();
+        if (productRepository.existsById(productId)) return productRepository.findById(productId).get();
         else {
             try {
                 throw new ProductNotFoundException("Product doesn't exist with the given product id: " + productId);
@@ -34,6 +35,7 @@ public class ProductServices {
         }
     }
 
+    @Override
     public Object insufficientStockDetails() {
         try {
             throw new InsufficientStockException("Due to insufficient stock your order has been failed");
@@ -42,6 +44,7 @@ public class ProductServices {
         }
     }
 
+    @Override
     public Object productNotFoundDetails() {
         try {
             throw new ProductNotFoundException("Product Doesn't Exist With The Given id");
@@ -50,18 +53,19 @@ public class ProductServices {
         }
     }
 
+    @Override
     public Object showOrderedProductDetails(Long productId) {
-       String message = webClientBuilder.build().get().uri("http://localhost:8082/details-by-productId/" + productId).retrieve().bodyToMono(String.class).block();
-        if (message.equals("No orders found.....!"))
-        return message;
+        String message = webClientBuilder.build().get().uri("http://localhost:8082/details-by-productId/" + productId).retrieve().bodyToMono(String.class).block();
+        if (message.equals("No orders found.....!")) return message;
         else {
             Object obj = webClientBuilder.build().get().uri("http://localhost:8082/details-by-productId/" + productId).retrieve().bodyToMono(Object.class).block();
             return obj;
         }
     }
 
+    @Override
     public void updateStock(Long productId) {
-       int stock= productRepository.findById(productId).get().getStock()-1;
-       productRepository.updateStockById(stock,productId);
+        int stock = productRepository.findById(productId).get().getStock() - 1;
+        productRepository.updateStockById(stock, productId);
     }
 }

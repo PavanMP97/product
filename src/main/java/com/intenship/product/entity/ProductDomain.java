@@ -19,4 +19,5 @@ public class ProductDomain {
     private String name;
     private int stock;
     private int price;
+
 }
